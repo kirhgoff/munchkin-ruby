@@ -8,9 +8,6 @@ class Position
   end
 
   def move(direction)
-    if direction.is_a? Direction
-      direction = direction.value
-    end
     case direction
       when :north then Position.new(x, y-1)
       when :south then Position.new(x, y+1)

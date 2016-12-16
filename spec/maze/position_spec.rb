@@ -1,5 +1,5 @@
-require 'maze/position'
-require 'model_helpers'
+require './lib/maze/position'
+require './spec/model_helpers'
 
 include TestUtils
 
@@ -15,7 +15,4 @@ RSpec.describe Position do
     expect(@position.move(:north)).to eq position(0, -1)
   end
 
-  it "accepts direction object as well" do
-    expect(@position.move(Direction.new(:east))).to eq position(1, 0)
-  end
 end

@@ -1,7 +1,8 @@
-require './lib/maze/maze.rb'
+require './lib/maze/position'
+require './lib/maze/maze'
 
 RSpec.describe Maze do
-  describe "Cell" do
+  describe Cell do
     it "has walls and exits" do
       cell = Cell.new([:west, :north])
 
@@ -13,7 +14,7 @@ RSpec.describe Maze do
     end
   end
 
-  describe "Room" do
+  describe Room do
     it "has three walls and one exit" do
       cell = Room.new(:north)
       walls = [:west, :south, :east]
@@ -25,13 +26,51 @@ RSpec.describe Maze do
     end
   end
 
-  describe "Plain" do
+  describe Plain do
     it "has no walls" do
       cell = Plain.new
       expect(Direction.all.map{|d| cell.has_wall_at?(d)}.any?).to be_falsey
 
       expect(cell.walls).to match_array([])
       expect(cell.exits).to match_array(Direction.all)
+    end
+  end
+
+  describe Block do
+    it "has only walls" do
+      cell = Block.new
+      expect(Direction.all.map{|d| cell.has_wall_at?(d)}.all?).to be_truthy
+
+      expect(cell.walls).to match_array(Direction.all)
+      expect(cell.exits).to match_array([])
+    end
+  end
+
+  describe "Maze" do
+    before do
+      @maze = Maze.new([
+        [cell(:west, :north), cell(:north, :south), cell(:north, :east)],
+        [cell(:west, :east), block, cell(:west, :east)],
+        [cell(:west, :south), cell(:north, :south), cell(:south, :east)]])
+    end
+
+    it "able to find cell by position" do
+      expect(@maze.cell_at(position(1, 1))).to be_a(Block)
+      expect(@maze.cell_at(position(0, 0)).walls).to contain_exactly(:north, :west)
+      expect(@maze.cell_at(position(1, 0)).walls).to contain_exactly(:north, :south)
+      expect(@maze.cell_at(position(0, 1)).walls).to contain_exactly(:west, :east)
+    end
+
+    it "able to execute path" do
+      expect(@maze.run(position(0, 0), [:east, :east])).to eq position(2, 0)
+      expect(@maze.run(position(0, 0), [:south, :south])).to eq position(0, 2)
+
+      expect {@maze.run(position(1, 0), [:north])}.to raise_error(ArgumentError)
+    end
+
+    it "finds a path" do
+      path = @maze.path(position(0, 0), position(2, 2))
+      expect(@maze.run(position(0,0), path)).to be(position(2, 2))
     end
   end
 

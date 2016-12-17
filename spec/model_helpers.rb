@@ -6,4 +6,12 @@ module TestUtils
   def direction (v)
     Direction.new(v)
   end
+
+  def cell(*more)
+    Cell.new(more)
+  end
+
+  def block
+    Block.new
+  end
 end

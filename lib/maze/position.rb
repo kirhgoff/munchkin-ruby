@@ -1,4 +1,8 @@
-require 'maze/direction'
+require './lib/maze/direction'
+
+def position (x, y)
+  Position.new(x, y)
+end
 
 class Position
   attr_reader :x, :y

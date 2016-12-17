@@ -1,7 +1,4 @@
 require './lib/maze/position'
-require './spec/model_helpers'
-
-include TestUtils
 
 RSpec.describe Position do
   before do

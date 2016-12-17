@@ -62,15 +62,39 @@ RSpec.describe Maze do
     end
 
     it "able to execute path" do
+      expect(@maze.run(position(0, 0), [:east])).to eq position(1, 0)
       expect(@maze.run(position(0, 0), [:east, :east])).to eq position(2, 0)
       expect(@maze.run(position(0, 0), [:south, :south])).to eq position(0, 2)
 
       expect {@maze.run(position(1, 0), [:north])}.to raise_error(ArgumentError)
     end
 
-    it "finds a path" do
-      path = @maze.path(position(0, 0), position(2, 2))
-      expect(@maze.run(position(0,0), path)).to be(position(2, 2))
+    it "can convert trail to path" do
+      expect(@maze.convert_to_path([position(0, 0)])).to match_array([])
+
+      expect(@maze.convert_to_path([position(0, 0), position(1, 0)]))
+          .to contain_exactly(:east)
+
+      expect(@maze.convert_to_path([position(0, 0), position(1, 0), position(2, 0)]))
+          .to match_array([:east, :east])
+
+      expect(@maze.convert_to_path([position(0, 0), position(1, 0), position(1, 1)]))
+          .to match_array([:east, :south])
+
+      expect {@maze.convert_to_path([position(0, 0), position(1, 1)])}
+          .to raise_error(ArgumentError)
+    end
+
+    it "finds a path in small maze" do
+      small_maze = Maze.new([[room(:east), room(:west)]])
+      path = small_maze.find_path(position(0, 0), position(1, 0))
+      expect(small_maze.run(position(0,0), path)).to eq position(1, 0)
+    end
+
+
+    it "finds a path in fixture maze" do
+      path = @maze.find_path(position(0, 0), position(2, 2))
+      expect(@maze.run(position(0,0), path)).to eq position(2, 2)
     end
   end
 

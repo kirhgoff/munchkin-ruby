@@ -29,4 +29,14 @@ class Position
   def ==(other)
     other != nil && x == other.x && y == other.y
   end
+
+  def eql?(other)
+    return self == other
+  end
+
+  def hash
+    to_s.hash
+  end
+
+
 end

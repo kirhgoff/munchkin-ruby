@@ -12,4 +12,7 @@ RSpec.describe Position do
     expect(@position.move(:north)).to eq position(0, -1)
   end
 
+  it "could be checked for equality" do
+      expect(position(1, 2)).to eq position(1, 2)
+  end
 end

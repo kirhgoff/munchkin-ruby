@@ -4,10 +4,9 @@ class MudReader
   def read_lore(socket)
     puts "Reader> Started"
     while true
-      puts "Reader> Reading..."
-      string = socket.recv(4*1024).chomp
-
-      print(string) if string != nil && !string.empty?
+      string = socket.recv(4*1024)
+      break if string.nil? || string.empty?
+      print(string)
       sleep 0.5
     end
     puts "Reader> Finished"
@@ -19,8 +18,7 @@ class MudWriter
     puts "Writer> Started"
     while true
       line = gets
-      puts "Writer> Writing: #{line}"
-      socket.send(line + "\n")
+      socket.send line + "\n", 0
     end
     puts "Writer> Finished"
   end

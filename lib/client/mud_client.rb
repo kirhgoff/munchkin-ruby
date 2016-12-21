@@ -11,7 +11,7 @@ class Looper
   def loop
     puts "#{@name}> Started"
     until @stop_flag
-      puts "#{@name}> Action..."
+      #puts "#{@name}> Action..."
       do_action
       sleep @delay
     end
@@ -37,7 +37,9 @@ class MudReader < Looper
   end
 
   def do_action
+    puts "Reader> reading"
     string = @socket.recv(4*1024)
+    puts "Reader> read #{string}"
     stop if string.nil? || string.empty?
     print(string) if !string.nil? && !string.empty?
   end
@@ -50,7 +52,9 @@ class UserInput < Looper
   end
 
   def do_action
-    @bot.issue_command(gets)
+    line = gets
+    puts "UserInput>read #{line}"
+    @bot.issue_command(line)
   end
 end
 
@@ -76,24 +80,24 @@ class Bot < Looper
   end
 
   def issue_command(command)
-    if command.starts_with? "bot:"
+    puts "Bot> issuing command #{command}"
+    if command.start_with? "bot:"
       print "Bot> Caught bot command #{command}, doing nothing."
       #TODO parse command
     else
       @mutex.synchronize do
+        puts "Bot> sending command #{command}"
         @socket.send command + "\n", 0
       end
     end
-
   end
-
 end
 
 socket = TCPSocket.new("falloutmud.org", 2222)
 bot = Bot.new(socket)
 
 bot_thread = Thread.new do
-  #bot.loop
+  bot.loop
 end
 
 reader_thread = Thread.new(socket, bot) do |s, b|

@@ -39,11 +39,11 @@ class MudReader < Looper
   end
 
   def do_action
-    puts "Reader> reading"
     string = @socket.recv(4*1024)
-    puts "Reader> read #{string}"
+    #puts "Reader> read #{string}"
     stop if string.nil? || string.empty?
     print(string) if !string.nil? && !string.empty?
+    @bot.parse_lore(string)
   end
 end
 
@@ -55,7 +55,7 @@ class UserInput < Looper
 
   def do_action
     line = gets
-    puts "UserInput>read #{line}"
+    #puts "UserInput>read #{line}"
     @bot.issue_command(line.chomp)
   end
 end
@@ -70,11 +70,12 @@ class GotoShopStrategy
   def initialize
     puts "Created goto shop strategy"
     @maze = Maze.new(MAP)
-    @path = @maze.find_path(position(6, 2), position(1, 3))
+    @path = @maze.find_path(position(6, 2), position(1, 3)).reverse
     puts "path is: #{@path}"
   end
 
   def next_command
+    puts "Remaining path: #{@path.inspect}"
     nil if @path.empty?
     @path.pop.to_s
   end
@@ -96,7 +97,6 @@ class Bot < Looper
   end
 
   def issue_command(command)
-    puts "Bot> issuing command #{command}"
     if command.start_with? "bot:"
       print "Bot> Caught bot command #{command}, doing nothing."
       @strategy = GotoShopStrategy.new if command == "bot:shopping"
@@ -106,6 +106,10 @@ class Bot < Looper
         @socket.send command + "\n", 0
       end
     end
+  end
+
+  def parse_lore(string)
+    @strategy = LoginStrategy.new if string =~ /What do they call ya/
   end
 end
 

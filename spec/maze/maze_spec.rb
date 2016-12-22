@@ -1,5 +1,6 @@
 require './lib/maze/position'
 require './lib/maze/maze'
+require './lib/maze/map'
 
 RSpec.describe Maze do
   describe Cell do
@@ -95,6 +96,13 @@ RSpec.describe Maze do
     it "finds a path in fixture maze" do
       path = @maze.find_path(position(0, 0), position(2, 2))
       expect(@maze.run(position(0,0), path)).to eq position(2, 2)
+    end
+
+    it "finds a path in a real maze" do
+      real_maze = Maze.new(MAP)
+      path = real_maze.find_path(position(6,2), position(1, 3))
+      puts path
+      expect(real_maze.run(position(6,2), path)).to eq position(1, 3)
     end
   end
 

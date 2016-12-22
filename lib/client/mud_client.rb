@@ -1,6 +1,8 @@
 require 'socket'
 require 'thread'
 
+require './lib/maze/map'
+
 class Looper
   def initialize(name, delay = 0.1)
     @stop_flag = false
@@ -54,13 +56,27 @@ class UserInput < Looper
   def do_action
     line = gets
     puts "UserInput>read #{line}"
-    @bot.issue_command(line)
+    @bot.issue_command(line.chomp)
   end
 end
 
 class DoNothingStrategy
   def next_command
     nil
+  end
+end
+
+class GotoShopStrategy
+  def initialize
+    puts "Created goto shop strategy"
+    @maze = Maze.new(MAP)
+    @path = @maze.find_path(position(6, 2), position(1, 3))
+    puts "path is: #{@path}"
+  end
+
+  def next_command
+    nil if @path.empty?
+    @path.pop.to_s
   end
 end
 
@@ -83,7 +99,7 @@ class Bot < Looper
     puts "Bot> issuing command #{command}"
     if command.start_with? "bot:"
       print "Bot> Caught bot command #{command}, doing nothing."
-      #TODO parse command
+      @strategy = GotoShopStrategy.new if command == "bot:shopping"
     else
       @mutex.synchronize do
         puts "Bot> sending command #{command}"

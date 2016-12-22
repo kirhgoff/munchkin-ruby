@@ -9,6 +9,10 @@ def block
   Block.new
 end
 
+def plain
+  Plain.new
+end
+
 def room(exit)
   Room.new(exit)
 end

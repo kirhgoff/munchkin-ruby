@@ -1,35 +1,9 @@
 require 'socket'
 require 'thread'
 
+require './lib/client/looper'
+require './lib/client/bot'
 require './lib/maze/map'
-
-class Looper
-  def initialize(name, delay = 0.1)
-    @stop_flag = false
-    @name = name
-    @delay = delay
-  end
-
-  def loop
-    puts "#{@name}> Started"
-    until @stop_flag
-      #puts "#{@name}> Action..."
-      do_action
-      sleep @delay
-    end
-    puts "#{@name}> Finished"
-
-  end
-
-  def do_action
-    # method to override
-  end
-
-  def stop
-    @stop_flag = true
-    puts "#{@name}> Stopping..."
-  end
-end
 
 class MudReader < Looper
   def initialize(socket, bot)
@@ -57,59 +31,6 @@ class UserInput < Looper
     line = gets
     #puts "UserInput>read #{line}"
     @bot.issue_command(line.chomp)
-  end
-end
-
-class DoNothingStrategy
-  def next_command
-    nil
-  end
-end
-
-class GotoShopStrategy
-  def initialize
-    puts "Created goto shop strategy"
-    @maze = Maze.new(MAP)
-    @path = @maze.find_path(position(6, 2), position(1, 3)).reverse
-    puts "path is: #{@path}"
-  end
-
-  def next_command
-    puts "Remaining path: #{@path.inspect}"
-    nil if @path.empty?
-    @path.pop.to_s
-  end
-end
-
-class Bot < Looper
-  def initialize(socket)
-    super("Bot", 1) #commands are issued once per second
-    @mutex = Mutex.new
-    @strategy = DoNothingStrategy.new
-    @mutex.synchronize do
-      @socket = socket
-    end
-  end
-
-  def do_action
-    command = @strategy.next_command
-    issue_command(command) unless command.nil?
-  end
-
-  def issue_command(command)
-    if command.start_with? "bot:"
-      print "Bot> Caught bot command #{command}, doing nothing."
-      @strategy = GotoShopStrategy.new if command == "bot:shopping"
-    else
-      @mutex.synchronize do
-        puts "Bot> sending command #{command}"
-        @socket.send command + "\n", 0
-      end
-    end
-  end
-
-  def parse_lore(string)
-    @strategy = LoginStrategy.new if string =~ /What do they call ya/
   end
 end
 

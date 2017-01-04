@@ -17,4 +17,25 @@ RSpec.describe Bot do
     expect(bot.position).to eq position(1,1)
   end
 
+  it "can parse inventory" do
+    strategy = double('Strategy')
+
+    bot = Bot.new(nil, nil)
+    bot.strategy = strategy
+
+    # Going west
+    expect(strategy).to receive(:update).with(
+        {:inventory =>
+             {:soda => 3, :newspaper => 1, :flip => 1, :shard => 15}
+        })
+
+    bot.parse_lore(
+      "You are carrying:\n" +
+      "(15) a shard of broken glass\n" +
+      "( 3) a soda can\n" +
+      "an old newspaper\n" +
+      "an old newspaper\n" +
+      "a pair of old brown flipflops\n")
+  end
+
 end

@@ -35,7 +35,7 @@ class UserInput < Looper
 end
 
 socket = TCPSocket.new("falloutmud.org", 2222)
-bot = Bot.new(socket)
+bot = Bot.new(socket, position(6, 2))
 
 bot_thread = Thread.new do
   bot.loop

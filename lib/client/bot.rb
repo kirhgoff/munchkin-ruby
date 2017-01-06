@@ -75,7 +75,7 @@ class Bot < Looper
       @strategy = GotoShopStrategy.new(@position)
     elsif string =~ /You can't go that way, asswipe/
       move_rollback
-    elsif string =~ /You are carrying:\n((\(\s[0-9]+\))*\s*(a|an).*\n)*/
+    elsif string =~ /You are carrying:/
       changes[:inventory] = parse_inventory(string)
       puts "Parsed inventory: #{changes[:inventory]}"
       if changes[:inventory].empty?
@@ -93,6 +93,7 @@ class Bot < Looper
   end
 
   def parse_inventory(string)
+    string = string[/You are carrying:\n(\(\s*[0-9]+\)\s+[\sa-zA-Z0-9]+\n)+/]
     inventory = {}
     string.split("\n").drop(1).each do |line|
       line = line.strip

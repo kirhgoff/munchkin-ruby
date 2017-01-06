@@ -56,21 +56,41 @@ class GotoShopStrategy < ModelListener
   def initialize(position)
     puts "Created goto shop strategy"
     @maze = Maze.new(MAP)
-    @path = @maze.find_path(position(6, 2), position).reverse
+    puts "Position is: #{position}"
+    @path = @maze.find_path(position, position(1,3)).reverse
     puts "path is: #{@path}"
   end
 
   def next_command
-    puts "Remaining path: #{@path.inspect}"
-    nil if @path.empty?
-    @path.pop.to_s
+    unless @path.empty?
+      @path.pop.to_s
+    else
+      nil
+    end
   end
 end
 
 #=============================================
 
 class SellAllStrategy < ModelListener
+  def initialize
+    puts "Created sellall strategy"
+    @inventory = {}
+  end
+
   def update(changes)
+    @inventory = changes[:inventory]
+    puts "Not inventory is #{@inventory}"
+  end
+
+  def next_command
+    if @inventory.empty?
+      "inv"
+    else
+      name,count = @inventory.pop
+      puts "Selling #{name} count=#{count}"
+      count != 1 ? "sell #{count} #{name}" : "sell #{name}"
+    end
   end
 end
 
@@ -78,15 +98,17 @@ end
 #=============================================
 
 class CollectStrategy < ModelListener
-  @command = nil
-  def next_command
-    @command
+  def initialize(bot)
+    @maze = Maze.new(MAP)
+    @bot = bot
   end
 
-  def update(changes)
-    if changes.key?(:menu_appeared)
-      @command = "0"
-    end
+  def next_command
+    [true, false].sample ? "get all" : roam.to_s
+  end
+
+  def roam
+    @maze.wander(@bot.position).sample
   end
 end
 

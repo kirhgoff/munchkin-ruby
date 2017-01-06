@@ -42,9 +42,13 @@ class Bot < Looper
 
   def issue_command(command)
     if command.start_with? "bot:"
-      print "Bot> Caught bot command #{command}, doing nothing."
-      @strategy = GotoShopStrategy.new(@position) if command == "bot:shopping"
-      puts "Bot position=#{@position} prev_position=#{@prev_position}" if command == "bot:position"
+      case command
+      when "bot:collect" then @strategy = CollectStrategy.new(self)
+      when "bot:shopping" then @strategy = GotoShopStrategy.new(@position)
+      when "bot:sell" then @strategy = SellAllStrategy.new
+      when "bot:position" then puts "Bot position=#{@position} prev_position=#{@prev_position}"
+      else puts "Dont know this command: #{command}"
+      end
     else
       # We monitor our position
       direction = Direction.parse(command)
@@ -73,6 +77,12 @@ class Bot < Looper
       move_rollback
     elsif string =~ /You are carrying:\n((\(\s[0-9]+\))*\s*(a|an).*\n)*/
       changes[:inventory] = parse_inventory(string)
+      puts "Parsed inventory: #{changes[:inventory]}"
+      if changes[:inventory].empty?
+        @strategy = CollectStrategy.new
+      end
+    elsif string =~ /There doesn't seem to be anything here/
+      changes[:empty] = true
     end
 
     unless changes.empty?

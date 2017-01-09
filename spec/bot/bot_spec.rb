@@ -17,57 +17,49 @@ RSpec.describe Bot do
     expect(bot.position).to eq position(1,1)
   end
 
-  it "can parse inventory" do
+  def check(inventory, lore_string)
     strategy = double('Strategy')
 
     bot = Bot.new(nil, nil)
     bot.strategy = strategy
 
-    # Going west
-    expect(strategy).to receive(:update).with(
-        {:inventory =>
-             {:soda => 3, :newspaper => 1, :flip => 1, :shard => 15}
-        })
+    expect(strategy).to receive(:update).with(inventory)
+    bot.parse_lore(lore_string)
+  end
 
-    bot.parse_lore(
+  it "can parse inventory" do
+    check({:inventory =>
+        {:can => 3, :newspaper => 1, :flipflops => 1, :shard => 15}
+      },
       "asdasdasdasdas\n"+
       "You are carrying:\n" +
       "(15) a shard of broken glass\n" +
       "( 3) a soda can\n" +
       "an old newspaper\n" +
-      "an old newspaper\n" +
-      "a pair of old brown flipflops\n")
+      "a pair of old brown flipflops\n"
+    )
   end
 
   it "can parse big inventory" do
-    lore =
-    "You are carrying:\n"+
-    "( 2) a Daisy 5000 assault rifle\n"+
-    "( 2) a small disposable flashlight\n"+
-    "( 2) a dirty map\n"+
-    "a Survival Guide for you to EXAMINE\n"+
-    "an old newspaper\n"+
-    "an old brown shirt\n"+
-    "( 2) an Emergency MRE\n"+
-    "a stuffed beaver\n"+
-    "a combat canteen\n"+
-    "a pair of old brown flipflops\n"+
-    "a soda can"
-
-
-    strategy = double('Strategy')
-
-    bot = Bot.new(nil, nil)
-    bot.strategy = strategy
-
-    # Going west
-    expect(strategy).to receive(:update).with(
-        {:inventory =>
-             {:soda => 3, :newspaper => 1, :flip => 1, :shard => 15}
-        })
-
-    bot.parse_lore(lore)
-
+    check(
+      {:inventory =>
+        {:rifle => 2, :flashlight => 2, :map => 2, :guide => 1,
+        :newspaper => 1, :shirt => 1, :MRE=>2, :beaver=>1,
+        :canteen=>1, :flipflops=>1, :can=>1}
+      },
+      "You are carrying:\n"+
+      "( 2) a Daisy 5000 assault rifle\n"+
+      "( 2) a small disposable flashlight\n"+
+      "( 2) a dirty map\n"+
+      "a Survival Guide for you to EXAMINE\n"+
+      "an old newspaper\n"+
+      "an old brown shirt\n"+
+      "( 2) an Emergency MRE\n"+
+      "a stuffed beaver\n"+
+      "a combat canteen\n"+
+      "a pair of old brown flipflops\n"+
+      "a soda can\n"
+    )
   end
 
 end

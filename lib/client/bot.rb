@@ -83,6 +83,12 @@ class Bot < Looper
       end
     elsif string =~ /There doesn't seem to be anything here/
       changes[:empty] = true
+    elsif string =~ /buck or two from selling your crap/
+      @position = Position.new(1,3)
+      @strategy = SellAllStrategy.new
+    elsif string =~ /A security guard stands here/
+      @position = Position.new(6,2)
+      @strategy = CollectStrategy.new
     end
 
     unless changes.empty?
@@ -96,6 +102,7 @@ class Bot < Looper
     string = string[/You are carrying:\n(\(\s*[0-9]+\)\s+[\sa-zA-Z0-9]+\n)+/]
     inventory = {}
     string.split("\n").drop(1).each do |line|
+      puts "processing line: #{line}"
       line = line.strip
       quantity = 1
       if line.start_with? "("
@@ -107,6 +114,7 @@ class Bot < Looper
       puts "Q=#{quantity} I=#{line} S=#{symbol}"
       inventory[symbol] = quantity
     end
+    puts "Inventory is #{inventory}"
     inventory
   end
 end

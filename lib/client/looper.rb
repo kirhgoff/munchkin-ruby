@@ -13,7 +13,6 @@ class Looper
       sleep @delay
     end
     puts "#{@name}> Finished"
-
   end
 
   def do_action

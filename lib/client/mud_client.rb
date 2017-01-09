@@ -34,19 +34,37 @@ class UserInput < Looper
   end
 end
 
+def exception(e,name)
+  puts "EXCEPTION:#{name} #{e.inspect}"
+  puts "MESSAGE:#{name} #{e.message}"
+  puts e.backtrace.join("\n\t").sub("\n\t", ": #{e}#{e.class ? " (#{e.class})" : ''}\n\t")
+end
+
 socket = TCPSocket.new("falloutmud.org", 2222)
 bot = Bot.new(socket, position(6, 2))
 
 bot_thread = Thread.new do
-  bot.loop
+  begin
+    bot.loop
+  rescue Exception => e
+    exception(e,"Bot")
+  end
 end
 
 reader_thread = Thread.new(socket, bot) do |s, b|
-  MudReader.new(s, b).loop
+  begin
+    MudReader.new(s, b).loop
+  rescue Exception => e
+    exception(e,"Reader")
+  end
 end
 
 input_thread = Thread.new(bot) do |b|
-  UserInput.new(b).loop
+  begin
+    UserInput.new(b).loop
+  rescue Exception => e
+    exception(e, "UserInput")
+  end
 end
 
 bot_thread.join

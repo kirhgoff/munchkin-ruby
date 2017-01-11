@@ -11,6 +11,7 @@ class Bot < Looper
   def initialize(socket, position)
     super("Bot", 1) #commands are issued once per second
     @mutex = Mutex.new
+    @log = open('lore.log', 'a')
 
     @position = position
     @prev_position = position
@@ -62,6 +63,8 @@ class Bot < Looper
   end
 
   def parse_lore(string)
+    @log << "----------- #{Time.now}\n"
+    @log << string
     changes = {}
     if string =~ /What do they call ya/
       changes[:login_requested] = true
@@ -71,6 +74,9 @@ class Bot < Looper
       changes[:menu_appeared] = true
     elsif string =~ /PRESS RETURN/
       changes[:menu_press_enter] = true
+    elsif string =~ /A security guard stands here/
+      @position = Position.new(6,2)
+      @strategy = CollectStrategy.new(self)
     elsif string =~ /(arms are already full|hands are full)/
       @strategy = GotoShopStrategy.new(@position)
     elsif string =~ /You can't go that way, asswipe/
@@ -79,16 +85,13 @@ class Bot < Looper
       changes[:inventory] = parse_inventory(string)
       puts "Parsed inventory: #{changes[:inventory]}"
       if changes[:inventory].empty?
-        @strategy = CollectStrategy.new
+        @strategy = CollectStrategy.new(self)
       end
     elsif string =~ /There doesn't seem to be anything here/
       changes[:empty] = true
     elsif string =~ /buck or two from selling your crap/
       @position = Position.new(1,3)
       @strategy = SellAllStrategy.new
-    elsif string =~ /A security guard stands here/
-      @position = Position.new(6,2)
-      @strategy = CollectStrategy.new
     end
 
     unless changes.empty?
@@ -98,10 +101,11 @@ class Bot < Looper
     end
   end
 
-  def parse_inventory(string)
-    string = string[/You are carrying:\n(\(\s*[0-9]+\)\s+[\sa-zA-Z0-9]+\n)+/]
+  def parse_inventory(inv_string)
+    #puts "\n---parse_inv---\n#{inv_string}\n---------"
+    #string = inv_string.match(/You are carrying:(\n\(\s*[0-9]+\)\s+[\sa-zA-Z0-9]+)+/)[1]
     inventory = {}
-    string.split("\n").drop(1).each do |line|
+    inv_string.strip.split("\n").drop(1).each do |line|
       puts "processing line: #{line}"
       line = line.strip
       quantity = 1

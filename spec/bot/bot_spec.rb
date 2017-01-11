@@ -62,4 +62,15 @@ RSpec.describe Bot do
     )
   end
 
+  it "can parse big inventory from file" do
+    check(
+      {:inventory =>
+         {:rifle => 2, :flashlight => 2, :map => 2, :guide => 1,
+          :newspaper => 1, :shirt => 1, :MRE=>2, :beaver=>1,
+          :canteen=>1, :flipflops=>1, :can=>1}
+      },
+      File.read('./fixtures/inv_sample.txt')
+    )
+  end
+
 end

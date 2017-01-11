@@ -87,7 +87,7 @@ class SellAllStrategy < ModelListener
     if @inventory.empty?
       "inv"
     else
-      name,count = @inventory.pop
+      name,count = @inventory.first
       puts "Selling #{name} count=#{count}"
       count != 1 ? "sell #{count} #{name}" : "sell #{name}"
     end
